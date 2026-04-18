@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Googol with Dashboard Sidebar</title>
+
+  <!-- Your existing Google-style fonts & base styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Quicksand:wght@300..700&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ─── your original base styles (reset, body, googol title, search bar, buttons) ─── */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #ffffff;
+      color: #202124;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 180px 20px;
+    }
+    h1 { font-size:5rem; text-align:center; margin-bottom:40px; }
+    h1 span:nth-child(1){color:#4285f4;} h1 span:nth-child(2){color:#ea4335;}
+    h1 span:nth-child(3){color:#fbbc05;} h1 span:nth-child(4){color:#4285f4;}
+    h1 span:nth-child(5){color:#34a853;} h1 span:nth-child(6){color:#ea4335;}
+    .container { text-align:center; max-width:600px; width:100%; }
+    .search-bar { display:flex; justify-content:center; margin-bottom:30px; }
+    .search-bar input {
+      flex:1; max-width:1500px;
+      padding:15px 20px; border:1px solid #dfe1e5;
+      border-radius:24px 0 0 24px; font-size:1.2rem;
+      box-shadow:0 1px 6px rgba(32,33,36,0.28);
+    }
+    .search-bar button {
+      border:1px solid #dfe1e5; background:#f8f9fa;
+      padding:15px 25px; font-size:1.2rem; border-radius:0 24px 24px 0;
+      cursor:pointer; transition:0.3s;
+    }
+    .search-bar button:hover { background:#e0e0e0; }
+    .buttons-section { display:flex; flex-direction:column; gap:20px; margin-top:30px; }
+    button {
+      background:#f8f9fa; color:#202124; border:1px solid #dfe1e5;
+      padding:15px 25px; font-size:1.2rem; border-radius:24px;
+      cursor:pointer; transition:0.3s;
+    }
+    button:hover { background:#e0e0e0; }
+    footer { margin-top:40px; font-size:0.9rem; color:#5f6368; }
+
+    /* ─── modal & overlay (unchanged) ─── */
+    .modal, .modal-overlay { display:none; }
+    .modal { /* ... */ }
+    .modal-overlay { /* ... */ }
+
+    /* ─── your sidepanel styles ─── */
+    .sidepanel {
+      height:100%; width:0; position:fixed; z-index:1000;
+      top:0; right:0; background:#80b9cf; overflow-x:hidden;
+      padding-top:60px; transition:0.5s; opacity:0.6;
+    }
+    .sidepanel .closebtn { position:absolute; top:0; left:25px; font-size:36px; }
+    .openbtn {
+      position:absolute; top:20px; right:20px; background:#80b9cf;
+      color:white; padding:10px 15px; border:none; border-radius:8px;
+      cursor:pointer; opacity:0.6; font-size:20px;
+    }
+    .openbtn:hover { background:#444; }
+
+    /* ─── START: Dashboard Columns & Top10 list styles ─── */
+    /* reuse font‐links above; then: */
+    #columns-wrapper {
+      display:flex; flex-direction:column; align-items:flex-start;
+      gap:1rem; padding:1rem;
+    }
+    .columns-box { max-width:32rem; width:100%;
+      display:flex; flex-direction:column; align-items:center;
+    }
+    #columns-container {
+      display:flex; gap:1rem; max-width:20rem; overflow-x:auto;
+      padding-bottom:0.5rem;
+    }
+    .column { display:flex; flex-direction:column;
+      width:100px; flex-shrink:0;
+    }
+    .rect {
+      padding:0.75rem; margin-bottom:0.5rem;
+      border-radius:4px; color:#fff; text-align:center;
+      word-break:break-word;
+    }
+    .rect-grey {
+      background:#46453E; max-height:60px;
+      overflow-x:auto; white-space:nowrap;
+      font-family:'Nunito',sans-serif; font-size:0.8rem;
+    }
+    .rect-purple {
+      background:#F8B4F9; display:flex;
+      flex-direction:column; align-items:center;
+      font-family:'Quicksand',sans-serif; color:#622C61;
+    }
+    .rect-orange {
+      background:#FF9859; font-family:'Quicksand',sans-serif;
+      color:#743A1B; font-size:0.7rem; font-weight:600;
+    }
+    .time-number { font-size:1rem; font-weight:700; opacity:0.9; line-height:1; }
+    .time-unit   { font-size:0.75rem; margin-top:0.2rem; opacity:0.8; }
+
+    .top10-button {
+      background:#46453E; color:#FEFEFB; font-family:'Nunito',sans-serif;
+      font-size:1rem; padding:0.75rem 1.5rem; border:none;
+      border-radius:12px; cursor:pointer; margin:1rem auto 0;
+      transition:0.3s;
+    }
+    .top10-button:hover { background:#5c5b52; }
+
+    .top10-list {
+      list-style:none; margin:0.5rem 0 0; padding:0;
+      max-width:15rem; width:100%;
+      display:flex; flex-direction:column; align-items:center;
+    }
+    .top10-list[hidden] { display:none !important; }
+    .top10-list li {
+      display:block; position:relative; background:#F0F0F0;
+      color:#333; padding:0.5rem 0.75rem; border-radius:4px;
+      margin:0.25rem 0; font-family:'Nunito',sans-serif;
+      transition:width 0.3s; white-space:nowrap; overflow:hidden;
+      cursor:pointer;
+    }
+    .top10-list li:hover::after {
+      content:attr(data-count);
+      position:absolute; right:10px; top:50%;
+      transform:translateY(-50%);
+      background:#46453E; color:#FEFEFB;
+      padding:0.2rem 0.4rem; border-radius:4px; font-size:0.8rem;
+      pointer-events:none;
+    }
+    .hidden{
+        display:none !important;
+    }
+    /* ─── END: Dashboard Columns styles ─── */
+  </style>
+</head>
+
+<body>
+  <h1>
+    <span>G</span><span>o</span><span>o</span><span>g</span><span>o</span><span>l</span>
+
+  </h1>
+
+  <div class="container">
+    <div class="search-bar">
+      <form id="searchForm" style="display:flex; width:100%; gap:10px;">
+        <input id="queryInput" name="query" type="text" placeholder="Search…" required/>
+        <select id="searchType" style="padding:10px; font-size:1rem;">
+          <option value="normal">Normal</option>
+          <option value="url">URL</option>
+        </select>
+        <button type="submit">Search</button>
+      </form>
+    </div>
+
+    <div class="buttons-section">
+      <form action="/addUrl" method="get">
+        <button type="submit">Add URL</button>
+      </form>
+
+      <form action="/clearQueue" method="get">
+        <button type="submit">Clear Queue</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sidepanel & toggle -->
+  <div id="mySidepanel" class="sidepanel">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+
+    <!-- ─── Dashboard Columns inserted into sidebar ─── -->
+    <div id="columns-wrapper">
+      <div class="columns-box">
+        <div id="columns-container"></div>
+        <p class="time-number">Downloader Count: <span id="downloaderCount"></span></p>
+        <button id="top10" class="top10-button">Top 10</button>
+        <ul id="top10-list" class="top10-list" hidden></ul>
+      </div>
+    </div>
+  </div>
+  <button id="openbtn" class="openbtn" onclick="openNav()">☰</button>
+
+  <!-- SockJS/STOMP scripts & your existing data logic -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+  <script>
+    // ─── your search form handler ───
+    document.getElementById("searchForm").addEventListener("submit", e=>{
+      e.preventDefault();
+      const q = encodeURIComponent(document.getElementById("queryInput").value);
+      const p = document.getElementById("searchType").value === "url" ? "/resultados2" : "/resultados";
+      window.location.href = `${p}?query=${q}`;
+    });
+
+
+    let stompClient = null;
+        let top10Searches = []; // Array to store the top 10 searches
+        
+        let averageResponseTime = [];
+        let barrelsID = [];
+        let barrelsIndexSizes = [];
+        let barrelPartitionIndex = [];
+        let downloaderCount = 0;
+
+        function connect() {
+            const socket = new SockJS('http://localhost:8080/ws'); // WebSocket endpoint
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+
+                // Subscribe to the notifications topic
+                stompClient.subscribe('/topic/notifications', function (message) {
+                    const messageBody = message.body;
+
+                    if (messageBody.startsWith('[') && messageBody.endsWith(']')) {
+                        let data;
+                        try {
+                            // Attempt to parse as JSON
+                            data = JSON.parse(messageBody);
+                        } catch (error) {
+                            console.warn('Failed to parse message as JSON:', messageBody);
+
+                            // Fallback: Parse manually if JSON parsing fails
+                            data = messageBody
+                                .slice(1, -1) // Remove the surrounding brackets
+                                .split(',')   // Split by commas
+                                .map(item => item.trim()); // Trim whitespace
+
+                            console.log('Parsed data:', data);
+                        }
+
+                        if (data[0] === "ALL_STATS") {
+                            barrelsID = [];
+                            barrelsIndexSizes = [];
+                            averageResponseTime = [];
+
+                            for (let i = 1; i < data.length-1; i++) {
+                                const [barrelID, indexSize, averageResponse, barrelPartition] = data[i].split('?');
+                                // barrelsID.push(barrelID);
+                                const barrelNumber = "Barrel " + i;
+                                barrelsID.push(barrelNumber);
+                                barrelsIndexSizes.push(indexSize);
+                                averageResponseTime.push(averageResponse);
+                                barrelPartitionIndex.push(barrelPartition);
+                                
+
+                                console.log('Barrel ID:', barrelID);
+                                console.log('Index Size:', indexSize);
+                                console.log('Average Response Time:', averageResponse);
+                                console.log('Barrel Partition:', barrelPartition);
+                                
+                            }
+                            downloaderCount = data[data.length-1];
+                            console.log('Downloader Count:', downloaderCount);
+                            // Update the downloader count in the sidebar
+                            const downloaderCountEl = document.getElementById('downloaderCount');
+                            downloaderCountEl.textContent = downloaderCount;
+                            const container = document.getElementById('columns-container');
+                            // Clear the container before appending new data
+                            container.innerHTML = '';
+
+                            // Add the data to the rect elements
+                            for (let i = 0; i < barrelsID.length; i++) {
+                                const col = document.createElement('div');
+                                col.className = 'column';
+
+                                const g = document.createElement('div');
+                                g.className = 'rect rect-grey';
+                                g.textContent = barrelsID[i];
+                                col.appendChild(g);
+
+                                const p = document.createElement('div');
+                                p.className = 'rect rect-purple';
+                                p.textContent = averageResponseTime[i] + " ms";
+                                col.appendChild(p);
+
+                                const o = document.createElement('div');
+                                o.className = 'rect rect-orange';
+                                o.textContent = barrelsIndexSizes[i];
+                                col.appendChild(o);
+
+                                const t = document.createElement('div');
+                                t.className = 'rect rect-orange';
+                                
+                                if (barrelPartitionIndex[i] === "A-Z") {
+                                    t.textContent = "Particion Index from A to Z";
+
+                                } else if (barrelPartitionIndex[i] === "A-M") {
+                                    t.textContent = "Particion Index from A to M";
+
+                                } else{
+                                    t.textContent = "Particion Index from N to Z";
+                                }
+                                col.appendChild(t);
+
+                                
+                                
+
+                                container.appendChild(col);
+                            }
+                        }
+                        
+                        else{
+
+                          top10Searches = [];
+                          for (let i = 0; i < data.length; i++) {
+                            const [word, count] = data[i].split(',');
+                            top10Searches.push({ word, count });
+                          }
+
+                          console.log(top10Searches);
+
+                          
+                          const listEl = document.getElementById('top10-list');
+                          
+                          listEl.innerHTML = '';
+                          
+                          const {word, count} = top10Searches[0];
+                          let topCount = parseInt(count,10);
+                          for(let i=0;i<top10Searches.length;i++){
+                              const {word, count}=top10Searches[i];
+                              console.log(top10Searches[0]);
+                              const li=document.createElement('li');
+                              li.textContent=word;
+                              li.style.width=(parseInt(count,10)/topCount*100)+'%';
+                              li.setAttribute('data-count',count);
+                              listEl.appendChild(li);
+                            }
+                          
+                        }
+                      }
+
+                });
+
+                // Notify the server that the client has connected
+                stompClient.send('/app/clientConnected', {}, 'Client connected');
+            }, function (error) {
+                console.error('WebSocket connection error: ' + error);
+            });
+
+          
+
+        }
+
+
+    // ─── sidepanel open/close ───
+    function openNav(){
+      document.getElementById("mySidepanel").style.width = "400px";
+      document.getElementById("openbtn").classList.add("hidden");
+    }
+    function closeNav(){
+      document.getElementById("mySidepanel").style.width = "0";
+      document.getElementById("openbtn").classList.remove("hidden");
+    }
+
+    function renderList(){
+      if (!top10Searches || top10Searches.length === 0) {
+        alert('No data available for the top 10 searches.');
+        return;
+      }
+      const listEl = document.getElementById('top10-list');
+                          
+      listEl.innerHTML = '';
+      
+      const {word, count} = top10Searches[0];
+      let topCount = parseInt(count,10);
+      for(let i=0;i<top10Searches.length;i++){
+          const {word, count}=top10Searches[i];
+          console.log(top10Searches[0]);
+          const li=document.createElement('li');
+          li.textContent=word;
+          li.style.width=(parseInt(count,10)/topCount*100)+'%';
+          li.setAttribute('data-count',count);
+          listEl.appendChild(li);
+        }
+                          
+
+    }
+
+    const btn = document.getElementById('top10');
+    const listEl = document.getElementById('top10-list');
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(listEl.hidden){
+        renderList();
+        listEl.hidden=false;
+      } else listEl.hidden=true;
+    });
+    listEl.addEventListener('click',e=>e.stopPropagation());
+    document.addEventListener('click',()=>{ listEl.hidden=true; });
+
+    // ─── your WebSocket/STOMP connection code ───
+    // …keep your existing connect(), subscribe(), openModal/closeModal, etc.
+    connect();
+  </script>
+
+  <footer>
+        &copy; 2025 Googol. All rights reserved.
+  </footer>
+</body>
+</html>

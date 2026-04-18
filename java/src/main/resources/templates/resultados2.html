@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Resultados - Googol</title>
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #ffffff;
+            color: #202124;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 40px;
+        }
+
+        /* Botão "G" */
+        .logo-button {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #4285f4; /* Azul Google */
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            flex-grow: 1;
+            align-items: center;
+        }
+
+        .search-bar input[type="text"] {
+            width: 100%;
+            max-width: 800px;
+            padding: 10px 15px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px 0 0 24px;
+            font-size: 1rem;
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+        }
+
+        .search-bar button {
+            background: #f8f9fa;
+            color: #202124;
+            border: 1px solid #dfe1e5;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 0 24px 24px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar button:hover {
+            background: #e0e0e0; /* Cinzento mais carregado */
+        }
+
+        .section {
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .results-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .results-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .results-section li {
+            margin-bottom: 10px;
+        }
+
+        .results-section a {
+            color: #4285f4;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .results-section a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: #5f6368;
+        }
+        
+        /* Button to trigger indexing */
+        .index-button {
+            background-color: #4285f4;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .index-button:hover {
+            background-color: #357ae8;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho com o botão "G" e a barra de pesquisa -->
+    <div class="header">
+        <!-- Botão "G" -->
+        <form action="/" method="get" style="margin-right: 20px;">
+            <button type="submit" class="logo-button">G</button>
+        </form>
+
+        <!-- Barra de Pesquisa -->
+        <div class="search-bar">
+            <form id="searchForm" style="display: flex; width: 100%; gap: 10px;">
+                <input type="text" name="query" id="queryInput" placeholder="Search for something..." th:value="${query}" required style="flex: 1;">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        
+
+        
+
+        <script>
+            document.getElementById("searchForm").addEventListener("submit", function(e) {
+                e.preventDefault();
+                const query = document.getElementById("queryInput").value;
+                window.location.href = `/resultados2?query=${encodeURIComponent(query)}`;
+        });
+        </script>
+    </div>
+
+    
+
+    <!-- Resultados da pesquisa -->
+    <div id="resultados2" class="section">A procurar resultados...</div> 
+    
+    <!-- Paginação -->
+    <div class="section" style="display: flex; gap: 10px; justify-content: center;">
+        <button id="prevPageBtn" class="index-button">Página Anterior</button>
+        <span id="pageIndicator">Página 1</span>
+        <button id="nextPageBtn" class="index-button">Próxima Página</button>
+    </div>
+
+    <script>
+        let currentPage = 0;
+
+        function updatePageIndicator() {
+            document.getElementById("pageIndicator").innerText = `Página ${currentPage + 1}`;
+        }
+
+        async function loadPage(query, page) {
+            try {
+                const resNormais = await fetch("/search2", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: `url=${encodeURIComponent(query)}&page=${page}`
+                });
+                const htmlResultados = await resNormais.text();
+                document.getElementById("resultados2").innerHTML = htmlResultados;
+            } catch (err) {
+                console.error("Erro ao carregar resultados da página:", err);
+                document.getElementById("resultados2").innerText = "Erro ao carregar página.";
+            }
+        }
+
+
+        (async function fetchResultados() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('query');
+
+            if (!query) {
+                document.body.innerHTML = "<p>Sem termo de pesquisa fornecido.</p>";
+                return;
+            }
+
+            try {
+                
+
+                // Resultados normais - usando POST
+                const resNormais = await fetch("/search2", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: `url=${encodeURIComponent(query)}`
+                });
+                const htmlResultados = await resNormais.text();
+                document.getElementById("resultados2").innerHTML = htmlResultados;
+
+
+            } catch (err) {
+                console.error("Erro ao buscar dados:", err);
+                
+                document.getElementById("resultados2").innerText = "Erro ao carregar resultados.";
+            }
+        })();
+
+
+        document.getElementById("nextPageBtn").addEventListener("click", async () => {
+            currentPage++;
+            updatePageIndicator();
+            const query = new URLSearchParams(window.location.search).get('query');
+            await loadPage(query, currentPage);
+        });
+
+        document.getElementById("prevPageBtn").addEventListener("click", async () => {
+            if (currentPage > 0) {
+                currentPage--;
+                updatePageIndicator();
+                const query = new URLSearchParams(window.location.search).get('query');
+                await loadPage(query, currentPage);
+            }
+        });
+
+        updatePageIndicator();
+    </script>
+
+
+    
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Adicionar URL - Googol</title>
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #ffffff;
+            color: #202124;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 180px 20px; /* Espaçamento para mover o conteúdo para baixo */
+        }
+
+        h1 {
+            font-size: 5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        /* Cores do título "Googol" */
+        h1 span:nth-child(1) { color: #4285f4; } /* Azul */
+        h1 span:nth-child(2) { color: #ea4335; } /* Vermelho */
+        h1 span:nth-child(3) { color: #fbbc05; } /* Amarelo */
+        h1 span:nth-child(4) { color: #4285f4; } /* Azul */
+        h1 span:nth-child(5) { color: #34a853; } /* Verde */
+        h1 span:nth-child(6) { color: #ea4335; } /* Vermelho */
+
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            max-width: 600px;
+            padding: 15px 20px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            font-size: 1.2rem;
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: #f8f9fa;
+            color: #202124;
+            border: 1px solid #dfe1e5;
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #e0e0e0; /* Cinzento mais carregado */
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 0.9rem;
+            color: #5f6368;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        <span>G</span><span>o</span><span>o</span><span>g</span><span>o</span><span>l</span>
+    </h1>
+
+    <div class="container">
+        <!-- Mensagem de erro -->
+        <div th:if="${error}" style="color: red; margin-bottom: 20px;">
+            <p th:text="${error}"></p>
+        </div>
+
+        <!-- Mensagem de sucesso -->
+        <div th:if="${message}" style="color: green; margin-bottom: 20px;">
+            <p th:text="${message}"></p>
+        </div>
+
+        <!-- Formulário para adicionar URL -->
+        <form action="/addUrlToQueue" method="post">
+            <input type="text" id="url" name="url" placeholder="https://example.com" required/>
+            <button type="submit">Add link</button>
+        </form>
+
+        <!-- Botão para voltar ao menu principal -->
+        <form action="/" method="get">
+            <button type="submit">Exit</button>
+        </form>
+    </div>
+
+    <footer>
+        &copy; 2025 Googol. All rights reserved.
+    </footer>
+</body>
+</html>

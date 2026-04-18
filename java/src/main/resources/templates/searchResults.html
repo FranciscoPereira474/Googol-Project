@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Search Engine - Googol</title>
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #ffffff;
+            color: #202124;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 40px;
+        }
+
+        /* Botão "G" */
+        .logo-button {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #4285f4; /* Azul Google */
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            flex-grow: 1;
+            align-items: center;
+        }
+
+        .search-bar input[type="text"] {
+            width: 100%;
+            max-width: 800px;
+            padding: 10px 15px;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px 0 0 24px;
+            font-size: 1rem;
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+        }
+
+        .search-bar button {
+            background: #f8f9fa;
+            color: #202124;
+            border: 1px solid #dfe1e5;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 0 24px 24px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-bar button:hover {
+            background: #e0e0e0; /* Cinzento mais carregado */
+        }
+
+        .results-section {
+            margin-top: 30px;
+            text-align: left;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .results-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        #results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .result-box {
+            border: 1px solid #dfe1e5;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #202124;
+        }
+
+        .result-url {
+            font-size: 1rem;
+            color: #1a73e8;
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .result-url:hover {
+            text-decoration: underline;
+        }
+
+        .no-results {
+            color: #d93025;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .pagination-button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .pagination-button:hover {
+            background: #357ae8;
+        }
+
+        .pagination-button:disabled {
+            background: #dfe1e5;
+            color: #9aa0a6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+ 
+    <!--
+    <div class="results-section">
+        <ul>
+            
+            <li th:if="${#lists.isEmpty(results)}" class="no-results">No results found.</li>
+
+            
+            <li th:each="result : ${results}">
+                <h3 th:text="${result.key}">Page Title</h3>
+                <a th:href="${result.value}" th:text="${result.value}" target="_blank">URL</a>
+            </li>
+        </ul>
+    </div>
+    -->
+    <div class="results-section">
+    <ul id="results-container">
+        <!-- Exibe "No results found." se a lista estiver vazia -->
+        <li th:if="${#lists.isEmpty(results)}" class="no-results">No results found.</li>
+
+        <!-- Itera sobre os resultados e exibe o título e o link -->
+        <li th:each="result : ${results}" class="result-box">
+            <h3 th:text="${result[0]}" class="result-title">Page Title</h3>
+            <a th:href="${result[1]}" th:text="${result[1]}" target="_blank" class="result-url">URL</a>
+            <p th:text="${result[2]}">Content Body</p>
+        </li>
+    </ul>
+
+    <!-- Botões de paginação -->
+    <div class="pagination">
+        <button th:if="${currentPage > 0}" th:onclick="'window.location.href=\'/search?page=' + (${currentPage} - 1) + '&query=' + ${query}'" class="pagination-button">Previous</button>
+        <button th:if="${hasNextPage}" th:onclick="'window.location.href=\'/search?page=' + (${currentPage} + 1) + '&query=' + ${query}'" class="pagination-button">Next</button>
+    </div>
+</div>
+
+
+
+</body>
+</html>

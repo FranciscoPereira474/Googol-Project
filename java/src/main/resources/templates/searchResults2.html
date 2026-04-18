@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Search Engine - Googol</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 80%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        a {
+            color: #1a0dab;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    
+
+    <div th:if="${#lists.isEmpty(results)}">
+        <p>Nenhum resultado encontrado.</p>
+    </div>
+
+    <table th:if="${not #lists.isEmpty(results)}">
+        <thead>
+            <tr>
+                <th>Link</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="result : ${results}">
+                <td>
+                    <span th:text="${#strings.length(result) > 49} ? ${result.substring(0,49) + '...'} : ${result}"></span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

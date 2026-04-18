@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Columns</title>
+
+  <!-- Load web fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #columns-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .columns-box {
+      max-width: 32rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #columns-container {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 1rem;
+      max-width: 20rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .column {
+      display: flex;
+      flex-direction: column;
+      width: 100px;
+      flex-shrink: 0;
+    }
+    .rect {
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      border-radius: 4px;
+      color: #fff;
+      text-align: center;
+      word-break: break-word;
+    }
+    .rect-grey {
+      background-color: #46453E;
+      max-height: 60px;
+      overflow-x: auto;
+      white-space: nowrap;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.8rem;
+    }
+    .rect-orange {
+      background-color: #FF9859;
+      font-family: 'Quicksand', sans-serif;
+      color: #743A1B;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .rect-purple {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #F8B4F9;
+      font-family: 'Quicksand', sans-serif;
+      color: #622C61;
+    }
+    .time-number {
+      font-size: 1.7rem;
+      font-weight: 700;
+      line-height: 1;
+      opacity: 0.9;
+    }
+    .time-unit {
+      font-size: 0.75rem;
+      margin-top: 0.2rem;
+      opacity: 0.8;
+    }
+    .top10-button {
+      background-color: #46453E;
+      color: #FEFEFB;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin: 1rem auto 0;
+      transition: background-color 0.3s ease;
+    }
+    .top10-button:hover {
+      background-color: #5c5b52;
+    }
+
+    /* Top10 list styling */
+    .top10-list {
+      list-style: none;
+      margin: 0.5rem 0 0;
+      padding: 0;
+      max-width: 15rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;    /* center bars */
+    }
+    .top10-list[hidden] {
+        display: none !important;  /* force it to respect hidden */
+    }
+
+    .top10-list li {
+      display: block;
+      position: relative;
+      background: #F0F0F0;
+      color: #333;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      margin: 0.25rem 0;       /* vertical spacing only */
+      font-family: 'Nunito', sans-serif;
+      transition: width 0.3s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .top10-list li:hover::after {
+      content: attr(data-count);
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #46453E;
+      color: #FEFEFB;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="columns-wrapper">
+    <div class="columns-box">
+      <div id="columns-container"></div>
+
+      <!-- Top 10 button -->
+      <button id="top10" class="top10-button">Top 10</button>
+
+      <!-- placeholder for the generated list -->
+      <ul id="top10-list" class="top10-list" hidden></ul>
+    </div>
+  </div>
+
+  <script>
+    // ---------- columns rendering ----------
+    const top10Words = [
+      "192.168.0.1:8080", "10.0.0.5:3000", "example.com:443",
+      "api.server.com", "172.16.0.1", "localhost:3001",
+      "cloud.app:9000", "dashboard.site", "devbox:8081",
+      "micro.service"
+    ];
+    const AverageResponseTimes = ["120 ms", "342 ms", "58 ms", "200 ms", "90 ms", "180 ms", "75 ms", "130 ms", "160 ms", "210 ms"];
+    const Stats = ["OK", "Timeout", "500 Internal", "OK", "OK", "Timeout", "OK", "500 Internal", "OK", "OK"];
+
+    const container = document.getElementById('columns-container');
+    const count = Math.min(top10Words.length, AverageResponseTimes.length, Stats.length);
+
+    for (let i = 0; i < count; i++) {
+      const col = document.createElement('div');
+      col.classList.add('column');
+
+      const grey = document.createElement('div');
+      grey.classList.add('rect', 'rect-grey');
+      grey.textContent = top10Words[i];
+      col.appendChild(grey);
+
+      const purple = document.createElement('div');
+      purple.classList.add('rect', 'rect-purple');
+      const [num, unit] = AverageResponseTimes[i].split(' ');
+      purple.innerHTML = `
+        <div class="time-number">${num}</div>
+        <div class="time-unit">${unit}</div>
+      `;
+      col.appendChild(purple);
+
+      const orange = document.createElement('div');
+      orange.classList.add('rect', 'rect-orange');
+      orange.textContent = Stats[i];
+      col.appendChild(orange);
+
+      container.appendChild(col);
+    }
+
+    // ---------- Top10 list logic ----------
+    const ListWords = ["all,5", "where,4", "why,3"];
+    const MAX_SIZE = 10;
+    const btn = document.getElementById('top10');
+    const listEl = document.getElementById('top10-list');
+
+    function renderList() {
+      listEl.innerHTML = '';
+      const maxCount = parseInt(ListWords[0].split(',')[1], 10);
+      const n = Math.min(ListWords.length, MAX_SIZE);
+
+      for (let i = 0; i < n; i++) {
+        const [word, strCount] = ListWords[i].split(',');
+        const count = parseInt(strCount, 10);
+
+        const li = document.createElement('li');
+        li.textContent = word;
+        li.style.width = (count / maxCount) * 100 + '%';
+        li.setAttribute('data-count', count);
+
+        listEl.appendChild(li);
+      }
+    }
+
+    // Toggle on button click
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (listEl.hidden) {
+        renderList();
+        listEl.hidden = false;
+        listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        listEl.hidden = true;
+      }
+    });
+
+    // Hide when clicking outside
+    document.addEventListener('click', e => {
+      if (!btn.contains(e.target) && !listEl.contains(e.target)) {
+        listEl.hidden = true;
+      }
+    });
+  </script>
+</body>
+</html>
